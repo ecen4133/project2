@@ -3,6 +3,7 @@ import sys
 import os
 import os.path
 import time
+import traceback
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
