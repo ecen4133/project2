@@ -42,8 +42,8 @@ def grade_xss(file, i):
     browser.delete_all_cookies()
 
     # login as victim (Using an XSS to post to the /login endpoint, of course!)
-    victim_pw = "e8ab4b135cc258799ff5f112a1287dfe"
-    browser.get("https://project2.ecen4133.org/search?q=%3Cbody+onload%3D%22%24.post%28%27https%3A%2F%2Fproject2.ecen4133.org%2Flogin%27%2C+%27username%3Dvictim%26password%3D"+victim_pw+"%27%29%22%3E")
+    victim_pw = "fcfd7d49552dcbd5b21ca3ba"
+    browser.get("https://project2.ecen4133.org/search?q=%3Cbody+onload%3D%22%24.post%28%27https%3A%2F%2Fproject2.ecen4133.org%2Flogin%27%2C+%27username%3Dvictim%26password%3De8ab4b135cc258799ff5f112a1287dfe%27%29%22%3E")
     sleep()
  
     # perform a search!
