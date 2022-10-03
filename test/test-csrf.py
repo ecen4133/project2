@@ -7,6 +7,7 @@ import traceback
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
 from pyvirtualdisplay import Display
 
 display = Display(visible=0, size=(800, 600))
@@ -78,7 +79,7 @@ def grade_csrf(file, i):
 
             # Check logged in user
             try:
-                if (browser.find_element_by_id('logged-in-user').text
+                if (browser.find_element(By.ID, 'logged-in-user').text
                         != 'attacker'):
                     csrf_grades.append((0, 'Logged as wrong user'))
                     print(csrf_grades)
