@@ -7,13 +7,8 @@ import socket
 import concurrent.futures
 import multiprocessing
 
-
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from pyvirtualdisplay import Display
-
-display = Display(visible=0, size=(800, 600))
-display.start()
+from selenium.webdriver.chrome.service import Service
 
 def sleep(t=0.4):
     time.sleep(t)
@@ -22,11 +17,13 @@ def extract(path):
     with open(path) as f:
         return f.read().strip()
 
-options = Options()
+service = Service(executable_path='./test/chromedriver')
+options = webdriver.ChromeOptions()
 options.add_argument('-headless')
 options.add_argument('-no-sandbox')
 options.add_argument('-disable-dev-shm-usage')
-browser = webdriver.Chrome('./test/chromedriver', chrome_options=options)
+browser = webdriver.Chrome(service=service, options=options)
+
 
 def close_browser():
     try:
@@ -43,7 +40,7 @@ def grade_xss(file, i):
 
     # login as victim (Using an XSS to post to the /login endpoint, of course!)
     victim_pw = "fcfd7d49552dcbd5b21ca3ba"
-    browser.get("https://project2.ecen4133.org/search?q=%3Cbody+onload%3D%22%24.post%28%27https%3A%2F%2Fproject2.ecen4133.org%2Flogin%27%2C+%27username%3Dvictim%26password%3De8ab4b135cc258799ff5f112a1287dfe%27%29%22%3E")
+    browser.get("https://project2.ecen4133.org/search?q=%3Cbody+onload%3D%22%24.post%28%27https%3A%2F%2Fproject2.ecen4133.org%2Flogin%27%2C+%27username%3Dvictim%26password%3D9a49b3f1c0a175e80d78d6c14a6561f8%27%29%22%3E")
     sleep()
  
     # perform a search!
@@ -82,7 +79,7 @@ def grade_xss(file, i):
     xss = extract(p1)
 
     with concurrent.futures.ThreadPoolExecutor() as ex:
-        future = ex.submit(xss_local_server) 
+        future = ex.submit(xss_local_server)
 
         print('  Loading "%s"...' % xss)
         browser.get(xss)

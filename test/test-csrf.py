@@ -6,18 +6,20 @@ import time
 import traceback
 
 from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+#from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
-from pyvirtualdisplay import Display
+#from pyvirtualdisplay import Display
 
-display = Display(visible=0, size=(800, 600))
-display.start()
+#display = Display(visible=0, size=(800, 600))
+#display.start()
 
-options = Options()
+service = Service(executable_path='./test/chromedriver')
+options = webdriver.ChromeOptions()
 options.add_argument('-headless')
 options.add_argument('-no-sandbox')
 options.add_argument('-disable-dev-shm-usage')
-browser = webdriver.Chrome('./test/chromedriver', chrome_options=options)
+browser = webdriver.Chrome(service=service, options=options)
 
 def close_browser():
     try:
@@ -26,6 +28,12 @@ def close_browser():
         pass
 
 atexit.register(close_browser)
+
+
+def set_cookie(browser, name, value):
+    cookie = {'domain': 'project2.ecen4133.org', 'name': name, 'value': value}
+    browser.execute_cdp_cmd('Network.enable', {})
+    browser.execute_cdp_cmd('Network.setCookie', cookie)
 
 def grade_csrf(file, i):
     path = "./"
@@ -40,10 +48,12 @@ def grade_csrf(file, i):
             time.sleep(0.1)
 
             # Set CSRF defense (using XSS!)
-            csrfdefense = "0" if i==0 else "1"
-            xssdefense = "4" if i==0 else "0"
+            csrfdefense = i
+            xssdefense = "4" if i=="0" else "0"
             browser.add_cookie({'name': 'xssdefense', 'value': xssdefense})
-            browser.add_cookie({'name': 'csrfdefense', 'value': csrfdefense})
+            browser.add_cookie({'name': 'csrfdefense', 'value': csrfdefense, 'sameSite': 'Lax'})
+
+
             time.sleep(0.1)
 
             # Load CSRF page
@@ -63,11 +73,12 @@ def grade_csrf(file, i):
                         'Unexpected alert box'))
                 print(csrf_grades)
                 sys.exit(1)
-            time.sleep(0.1)
+            time.sleep(0.2)
 
             # Load bungle again
             browser.get("https://project2.ecen4133.org/")
-            time.sleep(0.1)
+            time.sleep(0.2)
+            print(browser.get_cookies())
 
             # Check cookies
             cd_cookie = browser.get_cookie('csrfdefense')
@@ -84,7 +95,8 @@ def grade_csrf(file, i):
                     csrf_grades.append((0, 'Logged as wrong user'))
                     print(csrf_grades)
                     sys.exit(1)
-            except NoSuchElementException:
+            except Exception as e:
+                print(e)
                 csrf_grades.append((0, 'Not logged in'))
                 print(csrf_grades)
                 sys.exit(1)
