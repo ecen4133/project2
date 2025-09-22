@@ -17,12 +17,7 @@ def extract(path):
     with open(path) as f:
         return f.read().strip()
 
-if os.environ.get('GITHUB_ACTIONS'):
-    chromedriver_path = os.environ.get('CHROMEWEBDRIVER')
-else:
-    chromedriver_path = './test/chromedriver'
-
-service = Service(executable_path=chromedriver_path)
+service = Service(executable_path=os.environ.get('CHROMEWEBDRIVER'))
 options = webdriver.ChromeOptions()
 options.add_argument('-headless')
 options.add_argument('-no-sandbox')
