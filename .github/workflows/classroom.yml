@@ -1,0 +1,195 @@
+name: Autograding Tests
+'on':
+- push
+- workflow_dispatch
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Install Python packages
+      run: |
+        pip3 install selenium pyvirtualdisplay
+    - name: sql0
+      id: sql0
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: sql0
+        setup-command: ''
+        command: curl https://project2.ecen4133.org/sqlinject/0 -d `cat sql_0.txt`
+          2> /dev/null
+        input: ''
+        expected-output: "^<h1>Login successful!.*"
+        comparison-method: regex
+        timeout: 1
+        max-score: 7
+    - name: sql1
+      id: sql1
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: sql1
+        setup-command: ''
+        command: curl https://project2.ecen4133.org/sqlinject/1 -d `cat sql_1.txt`
+          2> /dev/null
+        input: ''
+        expected-output: "^<h1>Login successful!.*"
+        comparison-method: regex
+        timeout: 1
+        max-score: 10
+    - name: sql2
+      id: sql2
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: sql2
+        setup-command: ''
+        command: curl https://project2.ecen4133.org/sqlinject/2 -d `cat sql_2.txt`
+          2> /dev/null
+        input: ''
+        expected-output: "^<h1>Login successful!.*"
+        comparison-method: regex
+        timeout: 1
+        max-score: 10
+    - name: csrf0
+      id: csrf0
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: csrf0
+        setup-command: ""
+        command: " python3 test/test-csrf.py csrf_0.html 0"
+        input: ''
+        expected-output: "[(5, '')]"
+        comparison-method: contains
+        timeout: 1
+        max-score: 15
+    - name: csrf1
+      id: csrf1
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: csrf1
+        setup-command: ""
+        command: python3 test/test-csrf.py csrf_1.html 1
+        input: ''
+        expected-output: "[(5, '')]"
+        comparison-method: contains
+        timeout: 1
+        max-score: 15
+    - name: xss0
+      id: xss0
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: xss0
+        setup-command: ""
+        command: python3 test/test-xss.py xss_0.txt 1
+        input: ''
+        expected-output: "[(2, 'Correct')]"
+        comparison-method: contains
+        timeout: 1
+        max-score: 10
+    - name: xss1
+      id: xss1
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: xss1
+        setup-command: ""
+        command: python3 test/test-xss.py xss_1.txt 2
+        input: ''
+        expected-output: "[(2, 'Correct')]"
+        comparison-method: contains
+        timeout: 1
+        max-score: 10
+    - name: xss2
+      id: xss2
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: xss2
+        setup-command: ""
+        command: python3 test/test-xss.py xss_2.txt 3
+        input: ''
+        expected-output: "[(2, 'Correct')]"
+        comparison-method: contains
+        timeout: 1
+        max-score: 10
+    - name: xss3
+      id: xss3
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: xss3
+        setup-command: ""
+        command: python3 test/test-xss.py xss_3.txt 4
+        input: ''
+        expected-output: "[(2, 'Correct')]"
+        comparison-method: contains
+        timeout: 1
+        max-score: 10
+    - name: No repeated XSS
+      id: no-repeated-xss
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: No repeated XSS
+        setup-command: ''
+        command: cmp --silent xss_0.txt xss_1.txt; echo $?; cmp --silent xss_0.txt
+          xss_2.txt; echo $?; cmp --silent xss_0.txt xss_3.txt; echo $?; cmp --silent
+          xss_1.txt xss_2.txt; echo $?; cmp --silent xss_1.txt xss_3.txt; echo $?;
+          cmp --silent xss_2.txt xss_3.txt; echo $?
+        input: ''
+        expected-output: |-
+          1
+          1
+          1
+          1
+          1
+          1
+        comparison-method: contains
+        timeout: 1
+        max-score: 1
+    - name: sha256 test scripts
+      id: sha256-test-scripts
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: sha256 test scripts
+        setup-command: ''
+        command: sha256sum test/test-csrf.py test/test-xss.py test/chromedriver
+        input: ''
+        expected-output: |-
+          215f78ff46754c5bf89ba1e56037d96fa8634bd2ba0d43993999e6dc3567ccc5  test/test-csrf.py
+          03bf6cc5b192acb966b8af5405bb5cf1868dfc05db2f8778f30a1e0b369f9dee  test/test-xss.py
+          8f09d5d058da1dc67394b864870396cde84f888249fc25e3fa1db5c22de6f75c  test/chromedriver
+        comparison-method: contains
+        timeout: 1
+        max-score: 1
+    - name: xss payload submitted
+      id: xss-payload-submitted
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: xss payload submitted
+        setup-command: ''
+        command: cat xss_payload.html &> /dev/null; echo $?
+        input: ''
+        expected-output: '0'
+        comparison-method: contains
+        timeout: 1
+        max-score: 1
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        SQL0_RESULTS: "${{steps.sql0.outputs.result}}"
+        SQL1_RESULTS: "${{steps.sql1.outputs.result}}"
+        SQL2_RESULTS: "${{steps.sql2.outputs.result}}"
+        CSRF0_RESULTS: "${{steps.csrf0.outputs.result}}"
+        CSRF1_RESULTS: "${{steps.csrf1.outputs.result}}"
+        XSS0_RESULTS: "${{steps.xss0.outputs.result}}"
+        XSS1_RESULTS: "${{steps.xss1.outputs.result}}"
+        XSS2_RESULTS: "${{steps.xss2.outputs.result}}"
+        XSS3_RESULTS: "${{steps.xss3.outputs.result}}"
+        NO-REPEATED-XSS_RESULTS: "${{steps.no-repeated-xss.outputs.result}}"
+        SHA256-TEST-SCRIPTS_RESULTS: "${{steps.sha256-test-scripts.outputs.result}}"
+        XSS-PAYLOAD-SUBMITTED_RESULTS: "${{steps.xss-payload-submitted.outputs.result}}"
+      with:
+        runners: sql0,sql1,sql2,csrf0,csrf1,xss0,xss1,xss2,xss3,no-repeated-xss,sha256-test-scripts,xss-payload-submitted
