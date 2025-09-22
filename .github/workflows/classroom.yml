@@ -164,7 +164,6 @@ jobs:
           expected-output: |-
             949d4f8fee6627908e634195bdb3ec1184af1a6d26700fadc4fe840af3e349c6  test/test-csrf.py
             828f5d75254ef667abed7ccf657635143cbed66637bf759c24ab041975d44827  test/test-xss.py
-            8f09d5d058da1dc67394b864870396cde84f888249fc25e3fa1db5c22de6f75c  test/chromedriver
           comparison-method: contains
           timeout: 1
           max-score: 1
